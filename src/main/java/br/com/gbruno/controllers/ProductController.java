@@ -17,6 +17,8 @@ import java.util.UUID;
 @RestController
 public class ProductController {
 
+    public static final String PRODUCT_NOT_FOUND = "Product not found";
+
     @Autowired
     ProductRepository productRepository;
 
@@ -40,10 +42,24 @@ public class ProductController {
         Optional<ProductModel> product0 = productRepository.findById(id);
         if (product0.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Product not found");
+                    .body(PRODUCT_NOT_FOUND);
         }
             return ResponseEntity.status(HttpStatus.OK)
                     .body(product0.get());
+        }
+
+        @PutMapping("/products/{id}")
+        public ResponseEntity<Object> updateProduct(@PathVariable(value="id") UUID id,
+                                               @RequestBody @Valid ProductRecordDto productRecordDto) {
+            Optional<ProductModel> product0 = productRepository.findById(id);
+            if (product0.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(PRODUCT_NOT_FOUND);
+            }
+            var productModel = product0.get();
+            BeanUtils.copyProperties(productRecordDto, productModel);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(productRepository.save(productModel));
         }
 
     }
