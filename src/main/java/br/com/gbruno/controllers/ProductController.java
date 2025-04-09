@@ -18,6 +18,7 @@ import java.util.UUID;
 public class ProductController {
 
     public static final String PRODUCT_NOT_FOUND = "Product not found";
+    public static final String PRODUCT_DELETED_SUCCESSFULLY = "Product deleted successfully";
 
     @Autowired
     ProductRepository productRepository;
@@ -38,28 +39,37 @@ public class ProductController {
     }
 
     @GetMapping("/products/{id}")
-    public ResponseEntity<Object> getProductById(@PathVariable(value="id") UUID id) {
+    public ResponseEntity<Object> getProductById(@PathVariable(value = "id") UUID id) {
         Optional<ProductModel> product0 = productRepository.findById(id);
         if (product0.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(PRODUCT_NOT_FOUND);
         }
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(product0.get());
-        }
-
-        @PutMapping("/products/{id}")
-        public ResponseEntity<Object> updateProduct(@PathVariable(value="id") UUID id,
-                                               @RequestBody @Valid ProductRecordDto productRecordDto) {
-            Optional<ProductModel> product0 = productRepository.findById(id);
-            if (product0.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(PRODUCT_NOT_FOUND);
-            }
-            var productModel = product0.get();
-            BeanUtils.copyProperties(productRecordDto, productModel);
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(productRepository.save(productModel));
-        }
-
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(product0.get());
     }
+
+    @PutMapping("/products/{id}")
+    public ResponseEntity<Object> updateProduct(@PathVariable(value = "id") UUID id,
+                                                @RequestBody @Valid ProductRecordDto productRecordDto) {
+        Optional<ProductModel> product0 = productRepository.findById(id);
+        if (product0.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(PRODUCT_NOT_FOUND);
+        }
+        var productModel = product0.get();
+        BeanUtils.copyProperties(productRecordDto, productModel);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(productRepository.save(productModel));
+    }
+
+    @DeleteMapping("/products/{id}")
+    public ResponseEntity<Object> deleteProduct(@PathVariable(value = "id") UUID id) {
+        Optional<ProductModel> product0 = productRepository.findById(id);
+        if (product0.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(PRODUCT_NOT_FOUND);
+        }
+        productRepository.delete(product0.get());
+        return ResponseEntity.status(HttpStatus.OK).body(PRODUCT_DELETED_SUCCESSFULLY);
+    }
+}
