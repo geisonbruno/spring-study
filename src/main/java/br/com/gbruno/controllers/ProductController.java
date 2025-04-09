@@ -8,12 +8,11 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 public class ProductController {
@@ -36,4 +35,15 @@ public class ProductController {
                 .body(productRepository.findAll());
     }
 
-}
+    @GetMapping("/products/{id}")
+    public ResponseEntity<Object> getProductById(@PathVariable(value="id") UUID id) {
+        Optional<ProductModel> product0 = productRepository.findById(id);
+        if (product0.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Product not found");
+        }
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(product0.get());
+        }
+
+    }
